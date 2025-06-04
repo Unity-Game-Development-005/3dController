@@ -13,6 +13,9 @@ public class PlayerController : MonoBehaviour
     // get a reference ro the player's rigidbody component
     private Rigidbody playerRb;
 
+    // player's start location
+    private Vector3 playerStartPosition = new Vector3(20f, 0.5f, 0f);
+
     // player's movement speed
     public float playerSpeed = 5f;
 
@@ -84,6 +87,19 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    private void ResetPlayerPosition()
+    {
+        // stop player from moving
+        playerRb.isKinematic = true;
+
+        // reset player to start position
+        transform.position = playerStartPosition;
+
+        // allow player to move again
+        playerRb.isKinematic = false;
+    }
+
+
     private void PositionPowerupIndicator()
     {
         // places the powerup indicator at the feet of the player
@@ -127,6 +143,13 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collidingObject)
     {
+        // if the player falls off the platform
+        if (collidingObject.gameObject.CompareTag("Safety Net"))
+        {
+            ResetPlayerPosition();
+        }
+
+
         // if the player has collided with an enemy and is carrying a powerup item
         if (collidingObject.gameObject.CompareTag("Enemy") && hasPowerup)
         {

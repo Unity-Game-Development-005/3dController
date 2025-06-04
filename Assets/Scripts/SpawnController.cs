@@ -1,25 +1,49 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 
 
 public class SpawnController : MonoBehaviour
 {
+    // get a reference to the powerup controller
+    private PowerupController powerupController;
+
+
     // reference for enemy prefab
-    public GameObject enemyPrefab;
+    public GameObject[] enemyPrefabs;
+
+    // list for spawned enemies
+    //private List<GameObject> spawnedEnemiesList;
 
     // stores a random vector3 position to spawn enemy
-    private Vector3 randomPosition;
+    private Vector3 randomEnemyPosition;
 
-    // number of enemy to spawn
+    // the spawn range (x and z) to spawn enemies
     private int spawnRange = 9;
 
+    // keeps track of the number of enemies in play
+    // made public so it can be accessed for the enemy controller script
+    public int enemyCount;
+
+    // enemy wave number
+    // made public so it can be accessed for the enemy controller script
+    public int enemyWave;
+
+    // number of enemies to spawn per wave
+    // made public so it can be accessed for the enemy controller script
+    public int enemiesToSpawn;
 
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        SpawnEnemy();
+        // set reference to spawn controller script
+        powerupController = GameObject.Find("Powerup Controller").GetComponent<PowerupController>();
+
+        Initialise();
+
+        SpawnRandomEnemyWave(enemiesToSpawn);
     }
 
 
@@ -27,6 +51,18 @@ public class SpawnController : MonoBehaviour
     void Update()
     {
         
+    }
+
+
+    private void Initialise()
+    {
+        ///spawnedEnemiesList = new List<GameObject>();
+
+        enemyCount = 0;
+
+        enemyWave = 1;
+
+        enemiesToSpawn = 1;
     }
 
 
@@ -40,16 +76,34 @@ public class SpawnController : MonoBehaviour
         float spawnPosZ = Random.Range(-spawnRange, spawnRange);
 
         // create the new position
-        randomPosition = new Vector3(spawnPosX, 0f, spawnPosZ);
+        randomEnemyPosition = new Vector3(spawnPosX, 0f, spawnPosZ);
 
         // and return it
-        return randomPosition;
+        return randomEnemyPosition;
     }
 
 
-    private void SpawnEnemy()
+    // made public so it can be accessed for the enemy controller script 
+    public void SpawnRandomEnemyWave(int enemiesToSpawn)
     {
-        Instantiate(enemyPrefab, GenerateRandomSpawnPosition(), enemyPrefab.transform.rotation);
+        // loop through number of enemies to spawn
+        for (int enemy = 0; enemy < enemiesToSpawn; enemy++ )
+        {
+            // select a random enemy
+            int randomEnemy = Random.Range(0, enemyPrefabs.Length);
+
+            // instantiate the enemy at random spawn location
+            GameObject instantiatedObject = Instantiate(enemyPrefabs[randomEnemy], GenerateRandomSpawnPosition(), enemyPrefabs[randomEnemy].transform.rotation);
+
+            // add the enemy to the spawned enemies list
+            ///spawnedEnemiesList.Add(instantiatedObject);
+
+            // keep track of the number of enemies in play
+            enemyCount = enemiesToSpawn;
+        }
+
+        // spawn a random powerup
+        powerupController.SpawnRandomPowerup();
     }
 
 
