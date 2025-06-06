@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    // get a reference to the spawn controller script
+    private SpawnController spawnController;
+
+    // get a reference to the game controller script
+    private GameController gameController;
+
+
+
     // get a reference to the camera focal point transform
     // (set in inspector)
     public Transform focalPoint;
@@ -39,13 +47,37 @@ public class PlayerController : MonoBehaviour
     // vertical
     private float verticalInput;
 
+    // check to see if player is on the ground
+    public bool isOnGround = true;
+
+    // get a reference to the audio source component
+    private AudioSource audioPlayer;
+
+    // in-game sounds
+    public AudioClip jumpSound;
+
+    public AudioClip crashSound;
+
+    public AudioClip pickupSound;
+
+
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // set reference to spawn controller script
+        spawnController = GameObject.Find("Spawn Controller").GetComponent<SpawnController>();
+
+        // set reference to game controller script
+        gameController = GameObject.Find("Game Controller").GetComponent<GameController>();
+
+
         // set reference to the player's rigidbody component
         playerRb = GetComponent<Rigidbody>();
+
+        // set reference to the audio source component
+        audioPlayer = GetComponent<AudioSource>();
     }
 
 
@@ -69,11 +101,15 @@ public class PlayerController : MonoBehaviour
 
     private void GetPlayerInput()
     {
-        // player's forward and backward input
-        verticalInput = Input.GetAxis("Vertical");
+        // if we are playing the game
+        if (gameController.inPlay)
+        {
+            // get player's forward and backward input
+            verticalInput = Input.GetAxis("Vertical");
 
-        // player's left and right input
-        horizontalInput = Input.GetAxis("Horizontal");
+            // get player's left and right input
+            horizontalInput = Input.GetAxis("Horizontal");
+        }
     }
 
 
@@ -87,7 +123,7 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void ResetPlayerPosition()
+    public void ResetPlayerPosition()
     {
         // stop player from moving
         playerRb.isKinematic = true;
@@ -159,13 +195,16 @@ public class PlayerController : MonoBehaviour
             // set the direction of the knockback
             Vector3 knockBack = (collidingObject.gameObject.transform.position - transform.position);
 
-            Debug.Log("COLLIDED WITH " + collidingObject.gameObject.name + " with powerup set to " + hasPowerup);
+            //Debug.Log("COLLIDED WITH " + collidingObject.gameObject.name + " with powerup set to " + hasPowerup);
 
             // and knockback the enemy 
             ///enemyRigidbody.AddForce(knockBack * powerupStrength, ForceMode.Impulse);
 
             // destroy the enemy
             Destroy(collidingObject.gameObject);
+
+            // check to see if more enemies need to be respawned
+            spawnController.RespawnEnemies();
         }
     }
 

@@ -8,6 +8,9 @@ public class PowerupController : MonoBehaviour
     // get a reference to the game controller script
     //private GameController gameController;
 
+    // get a reference to the spawn controller script
+    private SpawnController spawnController;
+
 
     // set reference to pickup prefab
     public GameObject[] powerupPrefabs;
@@ -37,6 +40,9 @@ public class PowerupController : MonoBehaviour
     {
         // set reference to game controller script
         //gameController = GameObject.Find("Game Controller").GetComponent<GameController>();
+
+        // set reference to spawn controller script
+        spawnController = GameObject.Find("Spawn Controller").GetComponent<SpawnController>();
 
         //Initialise();
 
@@ -77,30 +83,13 @@ public class PowerupController : MonoBehaviour
     //}
 
 
-    // generates random spawn positions for the powerups
-    private Vector3 GenerateRandomSpawnPosition()
-    {
-        // get a random position along the'x' axis between -9 and 9
-        float spawnPosX = Random.Range(-spawnRange, spawnRange);
-
-        // get a random position along the'z' axis between -9 and 9
-        float spawnPosZ = Random.Range(-spawnRange, spawnRange);
-
-        // create the new position
-        randomPowerupPosition = new Vector3(spawnPosX, 0f, spawnPosZ);
-
-        // and return it
-        return randomPowerupPosition;
-    }
-
-
     public void SpawnRandomPowerup()
     {
-        // select a random enemy
+        // select a random powerup
         int randomPowerup = Random.Range(0, powerupPrefabs.Length);
 
-        // instantiate the obstacle at random spawn location
-        GameObject instantitatedObject = Instantiate(powerupPrefabs[randomPowerup], GenerateRandomSpawnPosition(), powerupPrefabs[randomPowerup].transform.rotation);
+        // instantiate the powerup at random spawn location
+        GameObject instantitatedObject = Instantiate(powerupPrefabs[randomPowerup], spawnController.GenerateRandomSpawnPosition(), powerupPrefabs[randomPowerup].transform.rotation);
     }
 
 

@@ -20,7 +20,7 @@ public class BrickController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collidingObject)
     {
-        if (collidingObject.gameObject.CompareTag("Ball"))
+        if (collidingObject.gameObject.CompareTag("Puck"))
         {
             Destroy(gameObject);
         }

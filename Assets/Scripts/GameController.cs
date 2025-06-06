@@ -9,8 +9,12 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    // set a reference to the player controller
+    // set a reference to the player controller script
     private PlayerController playerController;
+
+    // set a reference to the spawn controller script
+    private SpawnController spawnController;
+
 
     // set a reference to the pickup controller script
     //private PickupController pickupController;
@@ -18,22 +22,9 @@ public class GameController : MonoBehaviour
     // set a reference to the obstacle controller script
     //private ObstacleController obstacleController;
 
-    // set a reference to the scenery controller script
-    //private SceneryController sceneryController;
-
-
-    // game over panel
-    public Image gameOverPanel;
-
 
     // get a reference to the audio source component
     private AudioSource audioPlayer;
-
-    // game over text
-    public TMP_Text gameOverText;
-
-    // start game text
-    public TMP_Text startGameText;
 
     // score UI
     public TMP_Text scoreValue;
@@ -45,6 +36,10 @@ public class GameController : MonoBehaviour
     public TMP_Text bestTimeValue;
 
     public TMP_Text countdownTimerValue;
+
+
+    // reference to the main menu
+    [SerializeField] private GameObject mainMenu;
 
 
     // in-game sounds
@@ -95,11 +90,8 @@ public class GameController : MonoBehaviour
         // get the reference to the pickup controller script
         //pickupController = GameObject.Find("Pickup Controller").GetComponent<PickupController>();
 
-        // get the reference to the obstacle controller script
-        //obstacleController = GameObject.Find("Obstacle Controller").GetComponent<ObstacleController>();
-
-        // get the reference to the scenery controller script
-        //sceneryController = GameObject.Find("Background").GetComponent<SceneryController>();
+        // get the reference to the spawn controller script
+        spawnController = GameObject.Find("Spawn Controller").GetComponent<SpawnController>();
 
         // set reference to the audio source component
         audioPlayer = GetComponent<AudioSource>();
@@ -108,7 +100,7 @@ public class GameController : MonoBehaviour
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         Initialise();
 
@@ -119,16 +111,15 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GetPlayerInput();
+        //GetPlayerInput();
 
         RunTimers();
     }
 
 
-
     private void GetPlayerInput()
     {
-        WaitForKeyPress();
+        //WaitForKeyPress();
     }
 
 
@@ -148,37 +139,47 @@ public class GameController : MonoBehaviour
 
     private void Initialise()
     {
+        // if the game is over
         gameOver = true;
 
+        // if the game is in play
         inPlay = false;
 
+        // if the countdown can start
         startCountdown = false;
 
+        // number of seconds for countdown
         countdownTime = 3f;
     }
 
 
-    private void WaitForKeyPress()
+    public void ReadyPlayerOne()
     {
+        // deactivate the main menu screen
+        mainMenu.SetActive(false);
+
+        // start the game
+        StartCoroutine(StartGame());
+    }
+
+
+    private IEnumerator StartGame()
+    {
+        // create a short pause before actually starting the game
+        yield return new WaitForSeconds(1f);
+
+
         // if the game is over
         if (gameOver)
         {
-            // check to see if we press the 's' key to start/restart the game
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                // if we do
-                // clear the game over elements
-                gameOverPanel.gameObject.SetActive(false);
+            // wait for the countdown
+            StartCountdown();
 
-                // wait for the countdown
-                StartCountdown();
+            // set game in play flag
+            inPlay = true;
 
-                // set game in play flag
-                inPlay = true;
-
-                // and restart the game
-                GameInPlay();
-            }
+            // and restart the game
+            GameInPlay();
         }
     }
 
@@ -203,9 +204,11 @@ public class GameController : MonoBehaviour
 
         // clear any spawned obstacles
         //obstacleController.ClearSpawnedObstacles();
+        spawnController.InitialiseEnemySpawner();
 
         // reset player
         //playerController.InitialisePlayer();
+        playerController.ResetPlayerPosition();
 
         // initialise the score and time
         score = 0;
@@ -244,20 +247,20 @@ public class GameController : MonoBehaviour
             UpdateHighScore();
         }
 
-        // enable the game over UI elements
-        //gameOverPanel.gameObject.SetActive(true);
+        // enable the main menu screen
+        mainMenu.SetActive(true);
     }
 
 
     public void UpdateScore()
     {
-        scoreValue.text = score.ToString();
+        ///scoreValue.text = score.ToString();
     }
 
 
     private void UpdateHighScore()
     {
-        highScoreValue.text = highScore.ToString();
+        ///highScoreValue.text = highScore.ToString();
     }
 
 
@@ -288,7 +291,7 @@ public class GameController : MonoBehaviour
         startCountdown = false;
 
         // initialise time delay between seconds
-        waitSeconds = 2.8f;
+        waitSeconds = 1f;
 
         // if countdown time is greater than zero
         while (countdownTime > 0f)

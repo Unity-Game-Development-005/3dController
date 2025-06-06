@@ -19,7 +19,10 @@ public class SpawnController : MonoBehaviour
     private Vector3 randomEnemyPosition;
 
     // the spawn range (x and z) to spawn enemies
-    private int spawnRange = 9;
+    private float leftSpawnBoundaryZ;
+    private float rightSpawnBoundaryZ;
+    private float topSpawnBoundaryX;
+    private float bottomSpawnBoundaryX;
 
     // keeps track of the number of enemies in play
     // made public so it can be accessed for the enemy controller script
@@ -33,6 +36,9 @@ public class SpawnController : MonoBehaviour
     // made public so it can be accessed for the enemy controller script
     public int enemiesToSpawn;
 
+    // maximum enemies to spawn
+    private const int MAXIMUM_ENEMIES = 11;
+
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -41,20 +47,13 @@ public class SpawnController : MonoBehaviour
         // set reference to spawn controller script
         powerupController = GameObject.Find("Powerup Controller").GetComponent<PowerupController>();
 
-        Initialise();
+        InitialiseEnemySpawner();
 
-        SpawnRandomEnemyWave(enemiesToSpawn);
+        //SpawnRandomEnemyWave(enemiesToSpawn);
     }
 
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-    private void Initialise()
+    public void InitialiseEnemySpawner()
     {
         ///spawnedEnemiesList = new List<GameObject>();
 
@@ -63,17 +62,26 @@ public class SpawnController : MonoBehaviour
         enemyWave = 1;
 
         enemiesToSpawn = 1;
+
+        // spawn boundaries
+        leftSpawnBoundaryZ = -20f;
+        rightSpawnBoundaryZ = 20f;
+
+        topSpawnBoundaryX = -5f;
+        bottomSpawnBoundaryX = 14f;
+
+        ///SpawnRandomEnemyWave(enemiesToSpawn);
     }
 
 
     // generates random spawn positions for the enemy
-    private Vector3 GenerateRandomSpawnPosition()
+    public Vector3 GenerateRandomSpawnPosition()
     {
-        // get a random position along the'x' axis between -9 and 9
-        float spawnPosX = Random.Range(-spawnRange, spawnRange);
+        // get a random position along the'x' axis between the top and bottom spawn boundaries
+        float spawnPosX = Random.Range(topSpawnBoundaryX, bottomSpawnBoundaryX);
 
-        // get a random position along the'z' axis between -9 and 9
-        float spawnPosZ = Random.Range(-spawnRange, spawnRange);
+        // get a random position along the'z' axis between the left and right spawn boundaries
+        float spawnPosZ = Random.Range(leftSpawnBoundaryZ, rightSpawnBoundaryZ);
 
         // create the new position
         randomEnemyPosition = new Vector3(spawnPosX, 0f, spawnPosZ);
@@ -87,7 +95,7 @@ public class SpawnController : MonoBehaviour
     public void SpawnRandomEnemyWave(int enemiesToSpawn)
     {
         // loop through number of enemies to spawn
-        for (int enemy = 0; enemy < enemiesToSpawn; enemy++ )
+        for (int numberOfEnemies = 0; numberOfEnemies < enemiesToSpawn; numberOfEnemies++ )
         {
             // select a random enemy
             int randomEnemy = Random.Range(0, enemyPrefabs.Length);
@@ -97,13 +105,41 @@ public class SpawnController : MonoBehaviour
 
             // add the enemy to the spawned enemies list
             ///spawnedEnemiesList.Add(instantiatedObject);
-
-            // keep track of the number of enemies in play
-            enemyCount = enemiesToSpawn;
         }
+
+        // keep track of the number of enemies in play
+        enemyCount = enemiesToSpawn;
 
         // spawn a random powerup
         powerupController.SpawnRandomPowerup();
+    }
+
+
+    // check to see if more enemies need to be spawned
+    public void RespawnEnemies()
+    {
+        // subtract one from the number of enemies
+        enemyCount--;
+
+        // if there are no more enemies to kill
+        if (enemyCount == 0)
+        {
+            // play next wave
+            enemyWave++;
+
+            // increase the number of enemies
+            enemiesToSpawn++;
+
+            // if we have reached the maximum number of enemies to spawn
+            if (enemiesToSpawn > MAXIMUM_ENEMIES)
+            {
+                // set the number of enemies to spawn to the maximum number
+                enemiesToSpawn = MAXIMUM_ENEMIES;
+            }
+
+            // spawn next wave of enemies
+            SpawnRandomEnemyWave(enemiesToSpawn);
+        }
     }
 
 

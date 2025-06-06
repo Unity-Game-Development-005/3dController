@@ -11,6 +11,8 @@ TagManager:
   - Barrier
   - Safety Net
   - Brick
+  - Puck
+  - Ground
   layers:
   - Default
   - TransparentFX

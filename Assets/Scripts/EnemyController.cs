@@ -16,9 +16,6 @@ public class EnemyController : MonoBehaviour
     // enemy speed
     private float enemySpeed = 1f;
 
-    // maximum enemies to spawn
-    private const int MAXIMUM_ENEMIES = 11;
-
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -38,8 +35,10 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // get the position of the player and calculate a normalised direction toward them
         Vector3 lookDirection = ((player.transform.position - transform.position).normalized);
 
+        // move enemy toward player
         enemyRb.AddForce(lookDirection * enemySpeed);
     }
 
@@ -52,28 +51,8 @@ public class EnemyController : MonoBehaviour
             // destroy the enemy
             Destroy(gameObject);
 
-            // subtract one from the number of enemies
-            spawnController.enemyCount--;
-
-            // if there are no more enemies to kill
-            if (spawnController.enemyCount == 0)
-            {
-                // play next wave
-                spawnController.enemyWave++;
-
-                // increase the number of enemies
-                spawnController.enemiesToSpawn++;
-
-                // if we have reached the maximum number of enemies to spawn
-                if (spawnController.enemiesToSpawn > MAXIMUM_ENEMIES)
-                {
-                    // set the number of enemies to spawn to the maximum number
-                    spawnController.enemiesToSpawn = MAXIMUM_ENEMIES;
-                }
-
-                // spawn next wave of enemies
-                spawnController.SpawnRandomEnemyWave(spawnController.enemiesToSpawn);
-            }
+            // check to see if more enemies need to be respawned
+            spawnController.RespawnEnemies();
         }
     }
 
