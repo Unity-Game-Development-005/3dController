@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
+    // get a reference to the game controller script
+    private GameController gameController;
+
     // get a reference to the spawn controller script
     private SpawnController spawnController;
 
@@ -14,13 +17,19 @@ public class EnemyController : MonoBehaviour
     private GameObject player;
 
     // enemy speed
-    private float enemySpeed = 1f;
+    public float enemySpeed = 1f;
+
+    // damage to player
+    public int playerDamage;
 
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // set reference to game controller script
+        gameController = GameObject.Find("Game Controller").GetComponent<GameController>();
+
         // set reference to spawn controller script
         spawnController = GameObject.Find("Spawn Controller").GetComponent<SpawnController>();
 
@@ -38,8 +47,11 @@ public class EnemyController : MonoBehaviour
         // get the position of the player and calculate a normalised direction toward them
         Vector3 lookDirection = ((player.transform.position - transform.position).normalized);
 
-        // move enemy toward player
-        enemyRb.AddForce(lookDirection * enemySpeed);
+        if (gameController.inPlay)
+        {
+            // move enemy toward player
+            enemyRb.AddForce(lookDirection * enemySpeed);
+        }
     }
 
 

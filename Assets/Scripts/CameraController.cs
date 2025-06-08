@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    // how quickly the camera is moves to a new position
-    private float mouseSensitivity = 150f;
+    // how quickly the camera orbits around the player
+    private float rotationSensitivity = 150f;
+
+
+    // for player input
+    private float horizontalInput;
 
 
 
@@ -13,22 +17,33 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         // hide cursor
-        Cursor.visible = false;
+        ///Cursor.visible = false;
 
         // lock mouse to screen bounds
-        Cursor.lockState = CursorLockMode.Locked;
+        ///Cursor.lockState = CursorLockMode.Locked;
     }
+
 
     // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X");
+        GetPlayerInput();
 
-        //float mouseY = Input.GetAxis("Mouse Y");
+        OrbitCamera();
+    }
 
-        transform.Rotate(mouseSensitivity * mouseX * Time.deltaTime * Vector3.up);
 
-        //transform.Rotate(mouseSensitivity * mouseY * Time.deltaTime * Vector3.left);
+    private void GetPlayerInput()
+    {
+        ///float mouseX = Input.GetAxis("Mouse X");
+        horizontalInput = Input.GetAxis("Camera Orbit");
+    }
+
+
+    private void OrbitCamera()
+    {
+        ///transform.Rotate(mouseSensitivity * mouseX * Time.deltaTime * Vector3.up);
+        transform.Rotate(rotationSensitivity * horizontalInput * Time.deltaTime * Vector3.up);
     }
 
 

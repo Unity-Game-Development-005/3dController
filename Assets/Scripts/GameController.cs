@@ -4,15 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 
 public class GameController : MonoBehaviour
 {
-    // set a reference to the player controller script
+    // get a reference to the player controller script
     private PlayerController playerController;
 
-    // set a reference to the spawn controller script
+    // get a reference to the spawn controller script
     private SpawnController spawnController;
 
 
@@ -23,29 +24,41 @@ public class GameController : MonoBehaviour
     //private ObstacleController obstacleController;
 
 
-    // get a reference to the audio source component
-    private AudioSource audioPlayer;
-
     // score UI
     public TMP_Text scoreValue;
 
     public TMP_Text highScoreValue;
 
-    public TMP_Text elapsedTimeValue;
+    public TMP_Text waveValue;
+
+    public TMP_Text levelValue;
+
+    public TMP_Text highestWaveValue;
 
     public TMP_Text bestTimeValue;
+
+    public TMP_Text elapsedTimeValue;
 
     public TMP_Text countdownTimerValue;
 
 
-    // reference to the main menu
-    [SerializeField] private GameObject mainMenu;
+    // reference to the menu screens
+    public GameObject mainMenu;
+
+    public GameObject optionsMenu;
+
+    public GameObject pawzMenu;
 
 
     // in-game sounds
-    public AudioClip countSound;
+    // get a reference to the audio source component
+    [HideInInspector] public AudioSource audioPlayer;
+
+    public AudioClip countdownSound;
 
     public AudioClip goSound;
+
+    public AudioClip buttonClick;
 
 
 
@@ -54,6 +67,14 @@ public class GameController : MonoBehaviour
 
     // high score
     private int highScore = 0;
+
+    // enemy wave
+    private int enemyWave;
+
+    [HideInInspector] public int level;
+
+    // highest enemy wave
+    private int highestEnemyWave = 0;
 
     // elapsed time
     private float elapsedTime;
@@ -78,13 +99,21 @@ public class GameController : MonoBehaviour
     // pressed a key for start/restart flag
     [HideInInspector] public bool inPlay;
 
+    // can start countdown
     [HideInInspector] public bool startCountdown;
+
+    // indicates disabling of player while in countdown
+    [HideInInspector] public bool inCountdown;
+
+    // game is pawzed
+    [HideInInspector] public bool isPawzed;
+
 
 
 
     private void Awake()
     {
-        // get the reference to the player controller script
+        // set the reference to the player controller script
         playerController = GameObject.Find("Player").GetComponent<PlayerController>();
 
         // get the reference to the pickup controller script
@@ -96,7 +125,6 @@ public class GameController : MonoBehaviour
         // set reference to the audio source component
         audioPlayer = GetComponent<AudioSource>();
     }
-
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -111,15 +139,26 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //GetPlayerInput();
+        CheckForPawzGame();
 
         RunTimers();
     }
 
 
-    private void GetPlayerInput()
+    private void CheckForPawzGame()
     {
-        //WaitForKeyPress();
+        // if the player has pressed the escape key
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            // then freeze the game
+            Time.timeScale = 0;
+
+            // indicate game is pawzed
+            isPawzed = true;
+
+            // open the options screen
+            pawzMenu.SetActive(true);
+        }
     }
 
 
@@ -130,10 +169,10 @@ public class GameController : MonoBehaviour
             StartCoroutine(RunCountdownTimer());
         }
 
-        //else if (!gameOver)
-        //{
-            //RunGameTimeTimer();
-        //}
+        else if (!gameOver)
+        {
+            RunGameTimeTimer();
+        }
     }
 
 
@@ -148,8 +187,27 @@ public class GameController : MonoBehaviour
         // if the countdown can start
         startCountdown = false;
 
+        // not in countdown yet
+        inCountdown = false;
+
         // number of seconds for countdown
         countdownTime = 3f;
+    }
+
+
+    public void ResumeFromPawz()
+    {
+        // then deactivate the pawz screen
+        pawzMenu.SetActive(false);
+
+        // clear the pawz flag
+        isPawzed = false;
+
+        // un-freeze the game
+        Time.timeScale = 1;
+
+        // resume the game
+        StartCountdown();
     }
 
 
@@ -157,6 +215,9 @@ public class GameController : MonoBehaviour
     {
         // deactivate the main menu screen
         mainMenu.SetActive(false);
+
+        // un-freeze the game
+        Time.timeScale = 1;
 
         // start the game
         StartCoroutine(StartGame());
@@ -175,9 +236,6 @@ public class GameController : MonoBehaviour
             // wait for the countdown
             StartCountdown();
 
-            // set game in play flag
-            inPlay = true;
-
             // and restart the game
             GameInPlay();
         }
@@ -194,6 +252,9 @@ public class GameController : MonoBehaviour
 
         // start the countdown
         startCountdown = true;
+
+        // set in countdown for player control
+        inCountdown = true;
     }
 
 
@@ -204,7 +265,7 @@ public class GameController : MonoBehaviour
 
         // clear any spawned obstacles
         //obstacleController.ClearSpawnedObstacles();
-        spawnController.InitialiseEnemySpawner();
+        //spawnController.InitialiseEnemySpawner();
 
         // reset player
         //playerController.InitialisePlayer();
@@ -213,30 +274,36 @@ public class GameController : MonoBehaviour
         // initialise the score and time
         score = 0;
         
-        //elapsedTime = 0f;
+        elapsedTime = 0f;
 
-        //gameTime = 0f;
+        gameTime = 0f;
 
         // update the UI display
         UpdateScore();
         
-        //UpdateElapsedTime();
+        UpdateElapsedTime();
     }
 
 
     public void GameOver()
     {
+        // freeze the game
+        Time.timeScale = 0;
+
         // set game in play flag to false
         inPlay = false;
 
-        // if the current elapsed time is greater then the best time
-        //if (elapsedTime > bestTime)
-        //{
-            // update the best time
-            //bestTime = elapsedTime;
+        // set the game over flag
+        gameOver = true;
 
-            //UpdateBestTime();
-        //}
+        // if the current elapsed time is greater then the best time
+        if (elapsedTime > bestTime)
+        {
+            // update the best time
+            bestTime = elapsedTime;
+
+            UpdateBestTime();
+        }
 
         // if current score is greater than the high score
         if (score > highScore)
@@ -247,47 +314,36 @@ public class GameController : MonoBehaviour
             UpdateHighScore();
         }
 
+        // if the current wave is greater than the highest wave
+        if (enemyWave > highestEnemyWave )
+        {
+            // update highest enemy wave
+            UpdateHighestEnemyWave();
+        }
+
         // enable the main menu screen
         mainMenu.SetActive(true);
     }
 
 
-    public void UpdateScore()
+    private void RunGameTimeTimer()
     {
-        ///scoreValue.text = score.ToString();
-    }
-
-
-    private void UpdateHighScore()
-    {
-        ///highScoreValue.text = highScore.ToString();
-    }
-
-
-    //private void UpdateBestTime()
-    //{
-        //bestTimeValue.text = bestTime.ToString() + "s";
-    //}
-
-
-    //private void RunGameTimeTimer()
-    //{
         // update the game play time
-        //gameTime += Time.deltaTime;
+        gameTime += Time.deltaTime;
 
         // get the elapsed game time in seconds
-        //timeSpan = TimeSpan.FromSeconds(gameTime);
+        timeSpan = TimeSpan.FromSeconds(gameTime);
         
-        //elapsedTime = timeSpan.Seconds;
+        elapsedTime = timeSpan.Seconds;
 
         // update the display
-        //UpdateElapsedTime();
-    //}
+        UpdateElapsedTime();
+    }
 
 
     private IEnumerator RunCountdownTimer()
     {
-        // set countdown to false to prevent multiple calls from update
+        // set startcountdown to false to prevent multiple calls from update
         startCountdown = false;
 
         // initialise time delay between seconds
@@ -300,7 +356,7 @@ public class GameController : MonoBehaviour
             UpdateCountdownTimer();
 
             // play the countdown sound
-            audioPlayer.PlayOneShot(countSound, 1f);
+            audioPlayer.PlayOneShot(countdownSound, 1f);
 
             // wait for time delay between seconds
             yield return new WaitForSeconds(waitSeconds);
@@ -318,6 +374,12 @@ public class GameController : MonoBehaviour
 
         // end reset the countdown time
         countdownTime = 3f;
+
+        // not counting down, so allow play to move
+        inCountdown = false;
+
+        // set game in play flag
+        inPlay = true;
     }
 
 
@@ -327,10 +389,40 @@ public class GameController : MonoBehaviour
     }
 
 
-    //private void UpdateElapsedTime()
-    //{
-        //elapsedTimeValue.text = elapsedTime.ToString("0") + "s";
-    //}
+    private void UpdateElapsedTime()
+    {
+        elapsedTimeValue.text = elapsedTime.ToString("0") + "s";
+    }
+
+
+    public void UpdateScore()
+    {
+        scoreValue.text = score.ToString();
+    }
+
+
+    private void UpdateHighScore()
+    {
+        highScoreValue.text = highScore.ToString();
+    }
+
+
+    private void UpdateLevel()
+    {
+        levelValue.text = level.ToString();
+    }
+
+
+    private void UpdateHighestEnemyWave()
+    {
+        highestWaveValue.text = highestEnemyWave.ToString();
+    }
+
+
+    private void UpdateBestTime()
+    {
+        bestTimeValue.text = bestTime.ToString() + "s";
+    }
 
 
 } // end of class

@@ -4,7 +4,6 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Powerup
   - Enemy
   - Pickup
   - Ball
@@ -13,6 +12,7 @@ TagManager:
   - Brick
   - Puck
   - Ground
+  - Kill Powerup
   layers:
   - Default
   - TransparentFX

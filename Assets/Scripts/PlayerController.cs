@@ -11,6 +11,9 @@ public class PlayerController : MonoBehaviour
     // get a reference to the game controller script
     private GameController gameController;
 
+    // get a reference to the player's health bar script
+    private PlayerHealthBar playerHealthBar;
+
 
 
     // get a reference to the camera focal point transform
@@ -28,11 +31,15 @@ public class PlayerController : MonoBehaviour
     public float playerSpeed = 5f;
 
     // indicates player has pickup a powerup item
-    public bool hasPowerup;
+    public bool hasKillPowerup;
 
     // get a reference to the player's powerup indicator
     // (set in inspector)
     public GameObject powerupIndicator;
+
+    // get a reference to the player's health bar
+    // (set in inspector)
+    public GameObject healthBarIndicator;
 
     // strength of powerup
     private float powerupStrength = 15f;
@@ -47,9 +54,6 @@ public class PlayerController : MonoBehaviour
     // vertical
     private float verticalInput;
 
-    // check to see if player is on the ground
-    public bool isOnGround = true;
-
     // get a reference to the audio source component
     private AudioSource audioPlayer;
 
@@ -59,6 +63,10 @@ public class PlayerController : MonoBehaviour
     public AudioClip crashSound;
 
     public AudioClip pickupSound;
+
+
+    // maximum damage to player
+    private const int MAXIMUM_DAMAGE = 100;
 
 
 
@@ -72,6 +80,9 @@ public class PlayerController : MonoBehaviour
         // set reference to game controller script
         gameController = GameObject.Find("Game Controller").GetComponent<GameController>();
 
+        // set reference to player health bar script
+        playerHealthBar = GetComponentInChildren<PlayerHealthBar>();
+
 
         // set reference to the player's rigidbody component
         playerRb = GetComponent<Rigidbody>();
@@ -84,7 +95,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        PositionPowerupIndicator();
+        PositionIndicators();
 
         GetPlayerInput();
 
@@ -101,14 +112,18 @@ public class PlayerController : MonoBehaviour
 
     private void GetPlayerInput()
     {
-        // if we are playing the game
-        if (gameController.inPlay)
+        // if we are not in countdown
+        if (!gameController.inCountdown)
         {
-            // get player's forward and backward input
-            verticalInput = Input.GetAxis("Vertical");
+            // if we are playing the game
+            if (gameController.inPlay)
+            {
+                // get player's forward and backward input
+                verticalInput = Input.GetAxis("Vertical");
 
-            // get player's left and right input
-            horizontalInput = Input.GetAxis("Horizontal");
+                // get player's left and right input
+                horizontalInput = Input.GetAxis("Horizontal");
+            }
         }
     }
 
@@ -136,10 +151,13 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void PositionPowerupIndicator()
+    private void PositionIndicators()
     {
         // places the powerup indicator at the feet of the player
         powerupIndicator.transform.position = transform.position + new Vector3(0f, -0.5f, 0f);
+
+        // places the health bar at the head of the player
+        healthBarIndicator.transform.position = transform.position + new Vector3(0f, 2f, 0f);
     }
 
 
@@ -147,10 +165,10 @@ public class PlayerController : MonoBehaviour
     private void OnTriggerEnter(Collider collidingObject)
     {
         // if player has coillided with a powerup
-        if (collidingObject.CompareTag("Powerup"))
+        if (collidingObject.CompareTag("Kill Powerup"))
         {
             // set hasPowerup to true
-            hasPowerup = true;
+            hasKillPowerup = true;
 
             // destroy the powerup
             Destroy(collidingObject.gameObject);
@@ -170,7 +188,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(powerupTime);
 
         // the set haspower to false
-        hasPowerup = false;
+        hasKillPowerup = false;
 
         // deactivate the powerup incidator
         powerupIndicator.gameObject.SetActive(false);
@@ -187,7 +205,7 @@ public class PlayerController : MonoBehaviour
 
 
         // if the player has collided with an enemy and is carrying a powerup item
-        if (collidingObject.gameObject.CompareTag("Enemy") && hasPowerup)
+        if (collidingObject.gameObject.CompareTag("Enemy") && hasKillPowerup)
         {
             // get and set a reference to the enemy rigidbody component
             Rigidbody enemyRigidbody = collidingObject.gameObject.GetComponent<Rigidbody>();
