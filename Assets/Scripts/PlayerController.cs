@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
 
 
     // get a reference ro the player's rigidbody component
-    private Rigidbody playerRb;
+    public Rigidbody playerRb;
 
     // player's start location
     private Vector3 playerStartPosition = new Vector3(20f, 0.5f, 0f);
@@ -85,7 +85,7 @@ public class PlayerController : MonoBehaviour
 
 
         // set reference to the player's rigidbody component
-        playerRb = GetComponent<Rigidbody>();
+        //playerRb = GetComponent<Rigidbody>();
 
         // set reference to the audio source component
         audioPlayer = GetComponent<AudioSource>();

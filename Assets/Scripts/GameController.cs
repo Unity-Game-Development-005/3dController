@@ -16,6 +16,9 @@ public class GameController : MonoBehaviour
     // get a reference to the spawn controller script
     private SpawnController spawnController;
 
+    // get a reference to the menu controller script
+    //private MenuController menuController;
+
 
     // set a reference to the pickup controller script
     //private PickupController pickupController;
@@ -96,7 +99,7 @@ public class GameController : MonoBehaviour
     // game over flag
     [HideInInspector] public bool gameOver;
 
-    // pressed a key for start/restart flag
+    // start/restart, game in-play flag
     [HideInInspector] public bool inPlay;
 
     // can start countdown
@@ -121,6 +124,9 @@ public class GameController : MonoBehaviour
 
         // get the reference to the spawn controller script
         spawnController = GameObject.Find("Spawn Controller").GetComponent<SpawnController>();
+
+        // get the reference to the menu controller script
+        //menuController = GameObject.Find("UI").GetComponent<MenuController>();
 
         // set reference to the audio source component
         audioPlayer = GetComponent<AudioSource>();
@@ -151,10 +157,16 @@ public class GameController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             // then freeze the game
-            Time.timeScale = 0;
+            //Time.timeScale = 0;
+
+            // stop player from moving
+            playerController.playerRb.isKinematic = true;
 
             // indicate game is pawzed
             isPawzed = true;
+
+            // indicate the game is not currently in-play
+            inPlay = false;
 
             // open the options screen
             pawzMenu.SetActive(true);
@@ -164,13 +176,18 @@ public class GameController : MonoBehaviour
 
     private void RunTimers()
     {
+        // if the start game countdown can run
         if (startCountdown)
         {
+            // run the start game countdown
             StartCoroutine(RunCountdownTimer());
         }
 
+        // otherwise
+        //if the game is running
         else if (!gameOver)
         {
+            // run the game play timer
             RunGameTimeTimer();
         }
     }
@@ -197,7 +214,7 @@ public class GameController : MonoBehaviour
 
     public void ResumeFromPawz()
     {
-        // then deactivate the pawz screen
+        // deactivate the pawz screen
         pawzMenu.SetActive(false);
 
         // clear the pawz flag
@@ -288,7 +305,10 @@ public class GameController : MonoBehaviour
     public void GameOver()
     {
         // freeze the game
-        Time.timeScale = 0;
+        //Time.timeScale = 0;
+
+        // stop player from moving
+        playerController.playerRb.isKinematic = true;
 
         // set game in play flag to false
         inPlay = false;

@@ -18,22 +18,6 @@ public class MenuController : MonoBehaviour
 
 
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-
     // when the start game button is clicked
     public void StartGame()
     {
@@ -53,6 +37,12 @@ public class MenuController : MonoBehaviour
         // close the main menu
         gameController.mainMenu.SetActive(false);
 
+        // if the game is pawzed
+        if (gameController.isPawzed)
+        {
+            gameController.pawzMenu.SetActive(false);
+        }
+
         // and open the options menu
         gameController.optionsMenu.SetActive(true);
     }
@@ -66,8 +56,24 @@ public class MenuController : MonoBehaviour
         // close the options menu
         gameController.optionsMenu.SetActive(false);
 
-        // and open the main menu
-        gameController.mainMenu.SetActive(true);
+        // the game is pawzed
+        if (gameController.isPawzed)
+        {
+            gameController.pawzMenu.SetActive(true);
+        }
+
+        // otherwise
+        else
+        {
+            // open the main menu
+            gameController.mainMenu.SetActive(true);
+        }
+    }
+
+
+    public void OpenPawzScreen()
+    {
+
     }
 
 

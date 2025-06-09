@@ -4656,7 +4656,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6668015165383205834, guid: 873729e4f2d650b4ca12bf6d2e32396d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ReadyPlayerOne
+      value: ResumeFromPawz
       objectReference: {fileID: 0}
     - target: {fileID: 6668015165383205834, guid: 873729e4f2d650b4ca12bf6d2e32396d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -25361,6 +25361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   focalPoint: {fileID: 1574803995}
+  playerRb: {fileID: 2121053537}
   playerSpeed: 5
   hasKillPowerup: 0
   powerupIndicator: {fileID: 861705875}
